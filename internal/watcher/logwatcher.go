@@ -25,6 +25,7 @@ type LogWatcher struct {
 	alertsSent      int64
 	isRunning       bool
 	mu              sync.RWMutex
+	webBroadcaster  func(LogEntry) // Fonction pour diffuser vers l'interface web
 }
 
 // Stats représente les statistiques d'un LogWatcher
@@ -56,6 +57,13 @@ func NewLogWatcher(filePath string, cfg *config.Config) (*LogWatcher, error) {
 		ctx:      ctx,
 		cancel:   cancel,
 	}, nil
+}
+
+// SetWebBroadcaster définit la fonction de diffusion vers l'interface web
+func (lw *LogWatcher) SetWebBroadcaster(broadcaster func(LogEntry)) {
+	lw.mu.Lock()
+	defer lw.mu.Unlock()
+	lw.webBroadcaster = broadcaster
 }
 
 // Start démarre la surveillance du fichier de log
@@ -179,8 +187,15 @@ func (lw *LogWatcher) processLogEntries(logChan <-chan LogEntry) {
 				return
 			}
 
+			// Diffuser vers l'interface web si configuré
+			lw.mu.RLock()
+			if lw.webBroadcaster != nil {
+				lw.webBroadcaster(entry)
+			}
+			lw.mu.RUnlock()
+
 			// Traiter l'entrée avec le détecteur
-			lw.detector.ProcessLogEntry(entry.FilePath, entry.Line, entry.Timestamp)
+			lw.detector.ProcessLogEntry(entry.Line, entry.FilePath, entry.Timestamp)
 			atomic.AddInt64(&lw.alertsSent, 1)
 
 		case <-lw.ctx.Done():
