@@ -1,0 +1,58 @@
+{
+  "logs": [
+    {
+      "path": "1",
+      "patterns": [
+        {
+          "name": "errors",
+          "regex": "ERROR|CRITICAL|FATAL",
+          "severity": "high",
+          "enabled": true
+        },
+        {
+          "name": "warnings",
+          "regex": "WARN|WARNING",
+          "severity": "medium",
+          "enabled": true
+        }
+      ],
+      "enabled": true
+    }
+  ],
+  "alerts": {
+    "console": {
+      "enabled": true,
+      "colors": true
+    },
+    "email": {
+      "enabled": false,
+      "smtp_server": "",
+      "port": 587,
+      "username": "",
+      "password": "",
+      "from": "",
+      "to": null,
+      "tls": true
+    },
+    "webhook": {
+      "enabled": false,
+      "url": "",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    }
+  },
+  "storage": {
+    "type": "json",
+    "path": "alerts.json",
+    "max_size": 100,
+    "max_age": 30,
+    "compress": true
+  },
+  "web": {
+    "enabled": false,
+    "port": 8080,
+    "host": "localhost"
+  }
+}
